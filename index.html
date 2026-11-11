@@ -3063,7 +3063,7 @@ for(const id in SECTDEF){const S=SECTDEF[id],R=REG[S.reg];if(S.reg==='shaanxi'||
 /* ───────── 심득: 생사경(Lv.30)에 오른 뒤의 수련치로 능력치를 산다 (사용자 제안: 바람의나라처럼) ─────────
    생사경에서 얻는 수련치는 심득(G.sim)으로 쌓인다. 메뉴의 「심득」 칸에서 공격·방어·최대 체력·최대 내공을 산다.
    같은 항목을 살 때마다 그 값이 10%씩 오른다. 수치는 사용자 확인(2026-11-11). */
-const VER=32;   // 게시할 때마다 올린다 (메뉴의 「상태 복사」에 찍힌다)
+const VER=33;   // 게시할 때마다 올린다 (메뉴의 「상태 복사」에 찍힌다)
 const MAXLV=EXPT.length-1;
 const SIMS={atk:['공격',1,600],def:['방어',1,600],mhp:['최대 체력',10,400],mmp:['최대 내공',5,400]};
 function simHave(){if(G.sim==null)G.sim=G.lv>=MAXLV?Math.max(0,G.exp-EXPT[MAXLV]):0;return G.sim}   // 예전 기록: 생사경 뒤에 이미 쌓은 수련치를 그대로 쳐 준다
@@ -3934,7 +3934,7 @@ let clChecked=false;
    체질: 갈래 보정이 있는 체질(검골 등)은 그 갈래 숙련이 1.5배. 대기만성은 앞(무기 3단·무공 5성까지)은 절반, 그 뒤는 2배.
    진화형 14종·파 무공 8종의 이름과 효과, 수치는 전부 Claude가 정한 추정이다. 사람이 해 보고 고쳐야 한다. */
 const MU_THR=[0,0,4,10,18,28,40,54,70,88,110];        // n성에 필요한 숙련 (1성=0, 10성=110)
-const WM_THR=[0,25,70,150,280,450];                   // n단에 필요한 숙련
+const WM_THR=[0,13,35,75,140,225];   /* 사용자 2026-11-11: "너무 힘들다, 반으로" — 처음 값은 25·70·150·280·450 */                   // n단에 필요한 숙련
 const WM_KINDS=['검','도','창','봉','권','암기','편','선'];
 const WM_NAME=['입문 전','입문','숙련','정통','통달','무초식'];
 const MU_DUMMY_MAX=5,MU_PA_NEED=3;
@@ -4055,6 +4055,9 @@ let MUSK=null,MUFREE=0,MUNOTE=[];
       return sum}
     return h0(e,mul,label,fxk,kind,isSk)}}
 {const p0=doPlayer;doPlayer=async function(a){
+  if(muchoAny()&&!G.flags.mucho){   // 문턱이 낮아져(버전 33) 이미 5단을 넘겨 있던 기록: 다음 싸움의 첫 행동에서 무초식에 든다
+    G.flags.mucho=1;addTitle('무초식의 경지');const L=muAbsorbAll();await bsay(`<b>무초식의 경지</b>에 이르렀다! ${L.length?`익힌 초식 ${L.length}개가 모두 흩어져 손끝에 실렸다.`:''} 이제 기본 공격이 곧 무공이다.`,900);
+    if(a.t==='sk'&&!G.skills.includes(a.k))a={t:'atk',e:a.e||alive()[0]}}
   if(a.t==='rest'){await bsay('흩어진 기를 그러모으느라 움직이지 못한다…',520);return}
   if(a.t==='ult'){const e0=a.e&&a.e.hp>0?a.e:alive()[0],kd=weaponKind(),P=muchoProf(),m=ultMul(),used=G.mp;G.mp=0;bStat();BT.spent=1;
     await bsay(`남은 내공 ${used}을(를) 한 수에 싣는다. <b>일섬</b>!`,420);

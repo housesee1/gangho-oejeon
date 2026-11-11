@@ -2498,10 +2498,10 @@ for(const id in SECTDEF){const S=SECTDEF[id];if(!MAPDEF['f_'+S.reg])continue;
 const PERKX=[
   {id:'mem',n:'기억의 단서',d:'무극천주의 단서 둘을 알고 태어난다.',f(g){g.flags.lore0=1;g.flags.lore1=1}},
   {id:'cult',n:'전생의 감각',d:'수련치 +25%.'},
-  {id:'wall',n:'돌파의 기억',d:'Lv.3으로 시작한다.',f(g){gainExp(EXPT[3]-g.exp);g.hp=g.mhp;g.mp=g.mmp}},
+  {id:'wall',n:'돌파의 기억',d:'Lv.3으로 시작한다.',hd:'이어받는 경지가 2 높아진다.',f(g){if(g.hell)return;gainExp(EXPT[3]-g.exp);g.hp=g.mhp;g.mp=g.mmp}},
   {id:'life',n:'불사의 의지',d:'한 판에 한 번, 쓰러질 자리에서 체력 30%로 버틴다.'},
   {id:'gold',n:'되찾은 재물',d:'은자 150냥을 가지고 시작한다.',f(g){g.gold+=150}},
-  {id:'arms',n:'무구의 부름',d:'전생의 검 「추풍검」(공격 +12)을 쥐고 태어난다.',f(g){if(WEAPONS[g.weapon].atk<12)g.weapon='a14'}},
+  {id:'arms',n:'무구의 부름',d:'전생의 검 「추풍검」(공격 +12)을 쥐고 태어난다.',hd:'들고 가는 무구의 공격 +4.',f(g){if(g.hell)return;if(WEAPONS[g.weapon].atk<12)g.weapon='a14'}},
   {id:'ally',n:'귀인의 기억',d:'금창약 5 · 속명단 2 · 대청심환 1을 가지고 시작한다.',f(g){const I=g.items;I.salve=(I.salve||0)+5;I.salve2=(I.salve2||0)+2;I.pill2=(I.pill2||0)+1}},
   {id:'mu',n:'내공의 잔향',d:'최대 내공 +20.',f(g){g.mmp+=20;g.mp=g.mmp}},
   {id:'weak',n:'천주의 약점',d:'무극천주와 그 뒤의 세 사람에게 주는 피해 +25%.'},
@@ -2568,7 +2568,7 @@ function rebornScreen(){const m=loadMeta();if(!m.clears)return Promise.resolve(n
 /* ══ 메뉴에 회귀·직업 표시 ══ */
 {const r0=renderMenu;renderMenu=function(){r0();const b=$('menuBody'),P=PERKX.find(p=>p.id===G.perk);const x=[];
   if(G.career)x.push(`<p><b>${CAREER[G.career].n}</b> <small>${CAREER[G.career].fx}</small></p>`);
-  for(const P of PERKX.filter(p=>pk(p.id)))x.push(`<p>회귀 특전 <b>${P.n}</b> <small>${P.d}${P.id==='life'&&G.lifeUsed?' (이번 판에 이미 썼다)':''}</small></p>`);
+  for(const P of PERKX.filter(p=>pk(p.id)))x.push(`<p>회귀 특전 <b>${P.n}</b> <small>${G.hell&&P.hd||P.d}${P.id==='life'&&G.lifeUsed?' (이번 판에 이미 썼다)':''}</small></p>`);
   if(G.hell)x.push(`<p><b style="color:var(--rd)">${hellT()}단 지옥 「${HELL5[hellT()-1].n}」</b> <small>${hellMods(hellT()).join(' · ')}<br>${HELL5.slice(0,hellT()).map(h=>h.w).join(' ')}</small></p>`);
   if(F().awk)x.push(`<p>문파 각성 <b>${SHIDX[F().awk].n}</b> <small>${SHIDX[F().awk].st.join('·')} 계열 피해 +${Math.round(SHIDX[F().awk].mu*100)}%</small></p>`);
   x.push(`<p><small>강호의 원수 ${killN()}/6</small></p>`);
@@ -3065,7 +3065,7 @@ for(const id in SECTDEF){const S=SECTDEF[id],R=REG[S.reg];if(S.reg==='shaanxi'||
 /* ───────── 심득: 생사경(Lv.30)에 오른 뒤의 수련치로 능력치를 산다 (사용자 제안: 바람의나라처럼) ─────────
    생사경에서 얻는 수련치는 심득(G.sim)으로 쌓인다. 메뉴의 「심득」 칸에서 공격·방어·최대 체력·최대 내공을 산다.
    같은 항목을 살 때마다 그 값이 10%씩 오른다. 수치는 사용자 확인(2026-11-11). */
-const VER=29;   // 게시할 때마다 올린다 (메뉴의 「상태 복사」에 찍힌다)
+const VER=30;   // 게시할 때마다 올린다 (메뉴의 「상태 복사」에 찍힌다)
 const MAXLV=EXPT.length-1;
 const SIMS={atk:['공격',1,600],def:['방어',1,600],mhp:['최대 체력',10,400],mmp:['최대 내공',5,400]};
 function simHave(){if(G.sim==null)G.sim=G.lv>=MAXLV?Math.max(0,G.exp-EXPT[MAXLV]):0;return G.sim}   // 예전 기록: 생사경 뒤에 이미 쌓은 수련치를 그대로 쳐 준다
@@ -3723,7 +3723,7 @@ playerCmd=function(){
 const HELL5=[
   {n:'그림자의 땅',s:'감옥의 첫 층. 모든 것이 기억 그대로인데, 누군가 지켜본다.',mods:['strong','slow'],w:'들판마다 「천주의 그림자」가 떠돈다. 눈에 띄면 끝까지 쫓아온다.'},
   {n:'이빨을 감춘 짐승',s:'둘째 층. 그가 네 싸움을 배우기 시작했다.',mods:['frail','blind'],w:'들판의 우두머리들이 못 보던 수를 하나씩 쓴다.'},
-  {n:'두 번 죽는 자',s:'셋째 층. 한 번 죽여서는 끝나지 않는다.',mods:['noarms','fierce'],w:'무극천주는 쓰러진 뒤 혼으로 한 번 더 일어선다.'},
+  {n:'두 번 죽는 자',s:'셋째 층. 한 번 죽여서는 끝나지 않는다.',mods:['fierce'],w:'무극천주는 쓰러진 뒤 혼으로 한 번 더 일어선다.'},
   {n:'갈라진 혼',s:'넷째 층. 그가 흩어 둔 혼을 불러 모은다.',mods:['nocon','forget'],w:'금강법왕과 빙백천후가 처음부터 깨어 있다. 둘이 살아 있는 만큼 무극천주가 강해진다.'},
   {n:'무간',s:'감옥의 바닥. 여기서 끝난다. 어느 쪽으로든.',mods:['toll'],w:'위의 모든 것이 한꺼번에.'}];
 function hellT(){if(!G||!G.hell)return 0;if(!G.hv2){G.hell=Math.min(5,Math.ceil(G.hell/2));G.hv2=1}return G.hell}   // 예전(10단) 기록은 반으로 옮긴다
@@ -3759,12 +3759,12 @@ rebornScreen=function(){const m=hellMeta();if(!m.clears)return Promise.resolve(n
     step2=()=>{const bag=[],L=PERKX.slice();while(bag.length<nP+2&&L.length)bag.push(L.splice(Math.floor(Math.random()*L.length),1)[0]);
       if(FAST&&window.__perk&&!bag.some(p=>p.id===window.__perk))bag[0]=PERKX.find(p=>p.id===window.__perk);
       const draw=()=>{const e=ngBox(`<h2>회귀 특전</h2><p class="hint2">전생에서 ${nP>1?`${['','하나','둘','셋'][nP]}을`:'하나를'} 가지고 간다.${nP>1?` (고른 것 ${st.perks.length}/${nP})`:''}</p>
-        ${bag.map(p=>`<button class="bb" data-p="${p.id}"${st.perks.includes(p.id)?' style="border-color:#ffd84a"':''}>${st.perks.includes(p.id)?'✓ ':''}${p.n}<small>${p.d}</small></button>`).join('')}`);
+        ${bag.map(p=>`<button class="bb" data-p="${p.id}"${st.perks.includes(p.id)?' style="border-color:#ffd84a"':''}>${st.perks.includes(p.id)?'✓ ':''}${p.n}<small>${st.hell&&p.hd||p.d}</small></button>`).join('')}`);
         e.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{const id=b.dataset.p,i=st.perks.indexOf(id);if(i>=0)st.perks.splice(i,1);else st.perks.push(id);if(st.perks.length>=nP)step3();else draw()});
         if(FAST)setTimeout(()=>{const w=window.__perk,b=(w&&!st.perks.includes(w)&&e.querySelector(`[data-p="${w}"]`))||[...e.querySelectorAll('[data-p]')].find(x=>!st.perks.includes(x.dataset.p));b.click()},0)};draw()},
     step3=()=>{const pool=[...new Set((st.hell?[m.carryArm]:[]).concat(st.hell?m.harms:[]))].filter(k=>k&&WEAPONS[k]);
       if(!pool.length){ngClose();res(st);return}
-      const e=ngBox(`<h2>이어받기</h2><p class="hint2">지옥 판은 Lv.${carryLvOf(m)}에서 시작한다. 전생의 무구 한 점을 들고 간다.${st.hell>=3?'<br>(3단부터는 무구의 공격력이 절반만 든다)':''}</p>
+      const e=ngBox(`<h2>이어받기</h2><p class="hint2">지옥 판은 Lv.${carryLvOf(m)+(st.perks.includes('wall')?2:0)}에서 시작한다. 전생의 무구 한 점을 들고 간다.</p>
         ${pool.map(k=>`<button class="bb" data-c="${k}">${WEAPONS[k].n}<small>${ARMDATA[k].k} · 공격 +${WEAPONS[k].atk}${ARMDATA[k].hell?' · 지옥의 무구':''}</small></button>`).join('')}<button class="bb" data-c="">빈손으로 간다</button>`);
       e.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{st.carry=b.dataset.c||null;ngClose();res(st)});
       if(FAST)setTimeout(()=>e.querySelector('[data-c]').click(),0)};
@@ -3772,8 +3772,11 @@ rebornScreen=function(){const m=hellMeta();if(!m.clears)return Promise.resolve(n
 {const n0=newGame;newGame=function(sex,name,origin,con,bone){const X=NGX,m=hellMeta();n0(sex,name,origin,con,bone);if(!m.clears)return;
   const B=hellBoost(m.h5c||0);G.mhp+=B.mhp;G.hp=G.mhp;G.atk+=B.atk;G.def+=B.def;if(!X)return;
   G.perks=X.perks.slice();for(const id of X.perks.slice(1)){const P=PERKX.find(p=>p.id===id);if(P&&P.f)P.f(G)}
-  if(X.hell){const lv=carryLvOf(m);for(let i=0;i<400&&G.lv<lv;i++)gainExp(Math.max(1,EXPT[G.lv+1]-G.exp));G.hp=G.mhp;G.mp=G.mmp;   // 수련치 보정(수련 정체 등)에 상관없이 그 경지까지
+  if(X.hell){const lv=carryLvOf(m)+(X.perks.includes('wall')?2:0);   // 돌파의 기억: 지옥 판에서는 이어받는 경지 +2
+    for(let i=0;i<400&&G.lv<lv;i++)gainExp(Math.max(1,EXPT[G.lv+1]-G.exp));G.hp=G.mhp;G.mp=G.mmp;   // 수련치 보정(수련 정체 등)에 상관없이 그 경지까지
     if(X.carry){G.arms=[X.carry];if(WEAPONS[X.carry].atk>WEAPONS[G.weapon].atk)G.weapon=X.carry}}}}
+/* 무구의 부름: 지옥 판에서는 들고 가는 무구의 공격 +4 (사용자 결정 2026-11-11: 지옥의 무구 봉인은 뺐다) */
+{const a0=atkOf;atkOf=function(){return a0()+(G.hell&&pk('arms')&&ARMDATA[G.weapon]?4:0)}}
 /* ── 세상이 달라지는 것 ── */
 const SHADEX={snow:'freeze',jungle:'miasma',desert:'illusion',dry:'illusion',mount:'double',plain:'heal'};
 for(const key in REG){if(key==='mugeuk')continue;const R=REG[key],fid=key==='shaanxi'?'road':'f_'+key;if(!STORY.setup[fid])continue;

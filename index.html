@@ -3063,7 +3063,7 @@ for(const id in SECTDEF){const S=SECTDEF[id],R=REG[S.reg];if(S.reg==='shaanxi'||
 /* ───────── 심득: 생사경(Lv.30)에 오른 뒤의 수련치로 능력치를 산다 (사용자 제안: 바람의나라처럼) ─────────
    생사경에서 얻는 수련치는 심득(G.sim)으로 쌓인다. 메뉴의 「심득」 칸에서 공격·방어·최대 체력·최대 내공을 산다.
    같은 항목을 살 때마다 그 값이 10%씩 오른다. 수치는 사용자 확인(2026-11-11). */
-const VER=33;   // 게시할 때마다 올린다 (메뉴의 「상태 복사」에 찍힌다)
+const VER=34;   // 게시할 때마다 올린다 (메뉴의 「상태 복사」에 찍힌다)
 const MAXLV=EXPT.length-1;
 const SIMS={atk:['공격',1,600],def:['방어',1,600],mhp:['최대 체력',10,400],mmp:['최대 내공',5,400]};
 function simHave(){if(G.sim==null)G.sim=G.lv>=MAXLV?Math.max(0,G.exp-EXPT[MAXLV]):0;return G.sim}   // 예전 기록: 생사경 뒤에 이미 쌓은 수련치를 그대로 쳐 준다
@@ -3454,8 +3454,11 @@ giveArm=async function(k){const a=ARMDATA[k],w=WEAPONS[k];await say(a.d);
   if(a.k==='갑'){if(F()['arm_'+k])return;F()['arm_'+k]=1;G.def+=6;G.mhp+=30;G.hp=G.mhp;toast(`<b>${a.n}</b>을 얻었다 (방어 +6 · 최대 체력 +30)`,3000);return}
   const L=armOwned(),had=L.includes(k)||G.weapon===k;if(!L.includes(k))L.push(k);const out=[];
   if(!had&&ARMBONUS[k]&&!F()['armb_'+k]){F()['armb_'+k]=1;const b=ARMBONUS[k][0];for(const s in b){G[s]+=b[s];if(s==='mhp')G.hp+=b[s];if(s==='mmp')G.mp+=b[s]}out.push(ARMBONUS[k][1])}
-  if(w.atk>WEAPONS[G.weapon].atk){if(WEAPONS[G.weapon].atk>0&&!L.includes(G.weapon))L.push(G.weapon);G.weapon=k;toast(`<b>${a.n}</b>을 얻어 손에 들었다 (${armDesc(k)}${out.length?' · '+out.join(' · '):''})`,3200)}
-  else toast(`<b>${a.n}</b>을 얻어 짐에 넣었다 (${armDesc(k)}${out.length?' · '+out.join(' · '):''}) — 메뉴의 「무구」에서 바꿔 든다`,3600);
+  /* 사용자 2026-11-11: "새로 얻는 걸로 바뀌는데 끼고 있는 거 그대로 하자 → 같은 갈래만 바꿔 들자"
+     더 센 무구라도 갈래가 다르면 짐으로만 간다(닦던 무기 숙련이 엉뚱한 갈래로 넘어가지 않게). 맨손·호미일 때는 무엇이든 든다 */
+  const cur=WEAPONS[G.weapon],same=armKind(k)===weaponKind(),ex=out.length?' · '+out.join(' · '):'';
+  if(cur.atk<=1||(same&&w.atk>cur.atk)){if(cur.atk>0&&!L.includes(G.weapon))L.push(G.weapon);G.weapon=k;toast(`<b>${a.n}</b>을 얻어 손에 들었다 (${armDesc(k)}${ex})`,3200)}
+  else toast(`<b>${a.n}</b>을 얻어 짐에 넣었다 (${armDesc(k)}${!same&&w.atk>cur.atk?' · 지금 든 것보다 세지만 갈래가 달라 바꿔 들지 않았다':''}${ex}) — 메뉴의 「무구」에서 바꿔 든다`,4200);
   hud()};
 function armEquip(k){const L=armOwned();if(!L.includes(k)||k===G.weapon)return false;if(WEAPONS[G.weapon].atk>0&&!L.includes(G.weapon))L.push(G.weapon);G.weapon=k;hud();saveSoon();return true}
 /* 갈래: 무구를 들면 그 갈래로 친다. 초식과 갈래가 같으면 초식 피해 +10% */

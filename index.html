@@ -3063,7 +3063,7 @@ for(const id in SECTDEF){const S=SECTDEF[id],R=REG[S.reg];if(S.reg==='shaanxi'||
 /* ───────── 심득: 생사경(Lv.30)에 오른 뒤의 수련치로 능력치를 산다 (사용자 제안: 바람의나라처럼) ─────────
    생사경에서 얻는 수련치는 심득(G.sim)으로 쌓인다. 메뉴의 「심득」 칸에서 공격·방어·최대 체력·최대 내공을 산다.
    같은 항목을 살 때마다 그 값이 10%씩 오른다. 수치는 사용자 확인(2026-11-11). */
-const VER=35;   // 게시할 때마다 올린다 (메뉴의 「상태 복사」에 찍힌다)
+const VER=36;   // 게시할 때마다 올린다 (메뉴의 「상태 복사」에 찍힌다)
 const MAXLV=EXPT.length-1;
 const SIMS={atk:['공격',1,600],def:['방어',1,600],mhp:['최대 체력',10,400],mmp:['최대 내공',5,400]};
 function simHave(){if(G.sim==null)G.sim=G.lv>=MAXLV?Math.max(0,G.exp-EXPT[MAXLV]):0;return G.sim}   // 예전 기록: 생사경 뒤에 이미 쌓은 수련치를 그대로 쳐 준다
@@ -3920,7 +3920,7 @@ let clChecked=false;
    숙련을 두 겹으로 둔다.
    1) 무공 숙련(성): 모든 초식에 있다(운기조식 빼고). 싸움에서 쓸수록 오른다. 1성~10성, 10성이 대성. 작은 초식은 큰 무공(비전·진화형·고대 무학·상승 무공·파 뒤에 배우는 무공)의 절반만 닦으면 된다.
       · 성마다 그 무공 피해 +4%. 대성하면 큰 무공은 최대 체력 +20 · 최대 내공 +10, 작은 초식은 최대 체력 +5 (무공마다 한 번)
-      · 지금 있는 지방의 등급이 내 경지에 맞는 등급보다 낮으면 1/4만 오른다
+      · 지금 있는 지방의 등급이 내 경지에 맞는 등급보다 낮으면 1/4만 오른다. 생사경(Lv.30)부터는 어디서든 온전히 오른다
       · 문파 연무장의 목인을 치면 5성까지만 오른다
       · 윗무공(큰 무공)을 대성하면 아랫무공도 같이 대성한다: 문파 계통의 진전·입문 초식, 그리고 같은 갈래의 작은 초식
    2) 대성하면 진화 (사용자 결정 2026-11-11 밤: "10성 찍으면 진화만 하는 걸로, 파 해 봤자 이득이 없다" → 파(破)는 뺐다)
@@ -3994,7 +3994,8 @@ function wmStage(kd){const x=wmX(kd);let n=0;for(let i=1;i<=5;i++)if(x>=WM_THR[i
 function wmMul(kd){return 1+.05*wmStage(kd)}
 /* 약한 땅에서는 덜 오른다: 내 경지에 맞는 등급보다 낮은 지방이면 1/4 */
 function muTierOf(lv){let t=1;for(let i=1;i<=5;i++)if(lv>=RECLV[i])t=i;return t}
-function muLand(){let t=1;try{t=Math.min(5,REG[regKey()].tier)}catch(e){}return t>=muTierOf(G.lv)?1:.25}
+function muLand(){if(G.lv>=MAXLV)return 1;   /* 사용자 2026-11-11: "레벨 30 찍고 나면 숙련 올리기가 너무 힘들다" → 생사경(Lv.30)부터는 어디서든 온전히 */
+  let t=1;try{t=Math.min(5,REG[regKey()].tier)}catch(e){}return t>=muTierOf(G.lv)?1:.25}
 function muBody(kd,late){const c=conD();let m=1;if(kd&&c.kind&&c.kind[kd]>1)m*=1.5;if(c.late)m*=late?2:.5;return m}
 /* 숙련을 올린다. 단계가 오르면 알릴 글을 돌려준다 */
 function wmGain(kd,n){if(!WM_KINDS.includes(kd))return null;const s0=wmStage(kd);wmAll()[kd]=wmX(kd)+n*muBody(kd,s0>=3);const s1=wmStage(kd);

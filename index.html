@@ -3063,7 +3063,7 @@ for(const id in SECTDEF){const S=SECTDEF[id],R=REG[S.reg];if(S.reg==='shaanxi'||
 /* ───────── 심득: 생사경(Lv.30)에 오른 뒤의 수련치로 능력치를 산다 (사용자 제안: 바람의나라처럼) ─────────
    생사경에서 얻는 수련치는 심득(G.sim)으로 쌓인다. 메뉴의 「심득」 칸에서 공격·방어·최대 체력·최대 내공을 산다.
    같은 항목을 살 때마다 그 값이 10%씩 오른다. 수치는 사용자 확인(2026-11-11). */
-const VER=34;   // 게시할 때마다 올린다 (메뉴의 「상태 복사」에 찍힌다)
+const VER=35;   // 게시할 때마다 올린다 (메뉴의 「상태 복사」에 찍힌다)
 const MAXLV=EXPT.length-1;
 const SIMS={atk:['공격',1,600],def:['방어',1,600],mhp:['최대 체력',10,400],mmp:['최대 내공',5,400]};
 function simHave(){if(G.sim==null)G.sim=G.lv>=MAXLV?Math.max(0,G.exp-EXPT[MAXLV]):0;return G.sim}   // 예전 기록: 생사경 뒤에 이미 쌓은 수련치를 그대로 쳐 준다
@@ -3923,11 +3923,10 @@ let clChecked=false;
       · 지금 있는 지방의 등급이 내 경지에 맞는 등급보다 낮으면 1/4만 오른다
       · 문파 연무장의 목인을 치면 5성까지만 오른다
       · 윗무공(큰 무공)을 대성하면 아랫무공도 같이 대성한다: 문파 계통의 진전·입문 초식, 그리고 같은 갈래의 작은 초식
-   2) 대성의 갈림길
-      · 진화: 문파 비전이 문파마다 새로 쓴 윗단계 무공으로 거듭난다 (사부에게서). 폐관(문파 각성)은 예전 조건 그대로 따로 있다
-      · 파(破): 초식은 사라지고 「흔적」이 몸에 남는다. 그 자리에 문파 틀 밖의 새 무공 하나를 배운다. 그 갈래의 무기 숙련이 3단 이상이어야 한다. 문파 소속은 남는다
-        새 무공은 비전과 같은 급이고 1성부터 다시 시작한다. 큰 무공을 깨뜨릴 때만 얻는다. 진화형도 작은 초식도 대성하면 깨뜨릴 수 있다 (사부를 거치지 않는 것은 메뉴의 「무공」에서)
-        어느 갈래든 무초식에 든 뒤에는 깨뜨려도 새 무공을 배우지 못하고 흔적만 남는다 (사용자 결정)
+   2) 대성하면 진화 (사용자 결정 2026-11-11 밤: "10성 찍으면 진화만 하는 걸로, 파 해 봤자 이득이 없다" → 파(破)는 뺐다)
+      · 문파·세가의 비전을 대성하고 사부(세가는 무사)에게 가면 윗단계 무공으로 거듭난다. 고르는 장면은 없다. 폐관(문파 각성)은 예전 조건 그대로 따로 있다
+      · 진화형이 없는 큰 무공(고대 무학·상승 무공)과 작은 초식은 대성으로 끝난다. 모두 무초식에 오를 때 기본 공격에 실린다
+      · 예전 기록에 남은 파 무공(pa_*)과 흔적은 그대로 둔다. 새로 얻는 길은 없다
    3) 무기 숙련: 검·도·창·봉·권·암기·편·선. 그 갈래의 초식이나 기본 공격을 쓸수록 오른다. 5단까지, 단마다 그 갈래 초식 +5%
    4) 무초식: 어느 갈래든 무기 숙련 5단. 그 순간 가진 초식이 전부 깨져 흔적이 되고(그때의 성만큼), 기본 공격이 달라진다 (내공을 쓰지 않는다). 그 뒤로는 어떤 무기를 들어도 같다
       · 깨뜨린 흔적만 기본 공격에 실린다. 무초식에 든 뒤에도 대성한 무공을 깨뜨리면 더해진다 (MU_LIVE_CARRY 를 true 로 하면 깨뜨리지 않은 대성 무공도 실린다)
@@ -4001,7 +4000,7 @@ function muBody(kd,late){const c=conD();let m=1;if(kd&&c.kind&&c.kind[kd]>1)m*=1
 function wmGain(kd,n){if(!WM_KINDS.includes(kd))return null;const s0=wmStage(kd);wmAll()[kd]=wmX(kd)+n*muBody(kd,s0>=3);const s1=wmStage(kd);
   if(s1<=s0)return null;if(s1>=5){addTitle('무초식의 경지');const first=!G.flags.mucho;G.flags.mucho=1;const L=muAbsorbAll();
     return first?`<b>무초식의 경지</b>에 이르렀다! ${L.length?`익힌 초식 ${L.length}개(${L.join(', ')})가 모두 흩어져 손끝에 실렸다.`:'초식 없이도 손이 길을 안다.'} 이제 기본 공격이 곧 무공이다. 필살 「일섬」이 열렸다.`:`${kd}도 끝에 닿았다. (${kd} 초식 피해 +25%)`}
-  return`${kd} 숙련이 <b>${s1}단 (${WM_NAME[s1]})</b>에 올랐다. (${kd} 초식 피해 +${s1*5}%)${s1===MU_PA_NEED?' 이제 대성한 '+kd+' 초식을 깨뜨릴 수 있다.':''}`}
+  return`${kd} 숙련이 <b>${s1}단 (${WM_NAME[s1]})</b>에 올랐다. (${kd} 초식 피해 +${s1*5}%)`}
 /* 윗무공을 대성하면 아랫무공도 같이 대성한다 (사용자 2026-11-11: "노가다가 너무 빡셀 것 같다").
    문파 계통: 비전·진화형 → 그 문파의 진전·입문 초식. 그 밖의 작은 초식: 같은 갈래의 큰 무공을 대성하면 같이 */
 function muLower(k){if(!isBig(k))return[];const out=new Set();
@@ -4013,7 +4012,7 @@ function muGain(k,n,cap){if(!hasSung(k)||!G.skills.includes(k))return null;const
   muAll()[k]=Math.max(muX(k),x);const s1=sung(k);if(s1<=s0)return null;
   if(s1>=10){const big=isBig(k),bh=big?20:5,bm=big?10:0;if(!G.flags['ds_'+k]){G.flags['ds_'+k]=1;G.mhp+=bh;G.mmp+=bm;G.hp+=bh;G.mp+=bm}
     const sect=MULINE[k]&&MULINE[k].fork?MULINE[k]:null,low=muLower(k);low.forEach(muFull);
-    return`<b>「${SKILLS[k].n}」 대성!</b> 더 오를 곳이 없다. (최대 체력 +${bh}${bm?' · 최대 내공 +'+bm:''})${low.length?` 윗무공이 트이자 아랫무공도 함께 트였다: ${low.map(j=>SKILLS[j].n).join(', ')} 대성.`:''}${sect?` ${sect.who}를 찾아가자. 갈림길이 열렸다.`:' 메뉴의 「무공」에서 깨뜨릴 수 있다.'}`}
+    return`<b>「${SKILLS[k].n}」 대성!</b> 더 오를 곳이 없다. (최대 체력 +${bh}${bm?' · 최대 내공 +'+bm:''})${low.length?` 윗무공이 트이자 아랫무공도 함께 트였다: ${low.map(j=>SKILLS[j].n).join(', ')} 대성.`:''}${sect?` ${sect.who}를 찾아가면 한 단계 위로 거듭날 수 있다.`:''}`}
   return`「${SKILLS[k].n}」 <b>${s1}성</b>. (피해 +${(s1-1)*4}%)`}
 
 /* ── 흔적과 무초식 ── */
@@ -4036,7 +4035,7 @@ function muchoRaw(){const L=muCarriers();if(!L.length)return{n:0,total:1.5,hits:
     pierce:Math.max(...L.map(c=>c.pierce||0)),leech:Math.max(...L.map(c=>c.leech||0)),chill:Math.min(.8,comb('chill')),mpb:Math.min(10,L.reduce((a,c)=>a+(c.mpb||0),0)),names:L.map(c=>c.n)}}
 function muchoDesc(){const P=muchoProf();return[`세기 ${P.total}${P.raw?` (깨달음은 ${P.raw}이나 지금 경지로는 ${P.total}까지 — 경지가 오르면 더 나온다)`:''}${P.hits>1?' (×'+P.hits+'로 나눠 침)':''}`].concat(muFxDesc(P)).join(' · ')}
 /* 필살은 가진 초식을 모두 깨뜨린 뒤에 열린다 (사용자: "가진 무공을 다 깨뜨려야 필살기가 생긴다"). 운기조식처럼 치지 않는 것은 세지 않는다 */
-function ultWhy(){if(!muchoOn())return'무초식이 아니다';if(!trAll().length)return'깨뜨린 무공이 있어야 한다';const L=G.skills.filter(hasSung);if(L.length)return`가진 초식을 모두 깨뜨려야 한다 (남은 것: ${L.map(k=>SKILLS[k].n).join(', ')})`;
+function ultWhy(){if(!muchoOn())return'무초식이 아니다';if(!trAll().length)return'깨뜨린 무공이 있어야 한다';const L=G.skills.filter(hasSung);if(L.length)return`아직 초식이 남아 있다 (${L.map(k=>SKILLS[k].n).join(', ')}) — 다음 싸움에서 손끝에 실린다`;
   if(!(G.mmp>0)||G.mp<Math.ceil(G.mmp/2))return'내공이 절반 이상이어야 한다';return null}
 function ultOK(){return!ultWhy()}
 function ultMul(){return+(muchoProf().total*(1+G.mp/G.mmp)).toFixed(2)}
@@ -4094,31 +4093,11 @@ for(const id in SECTDEF){const s0=STORY.setup[id];if(!s0)continue;
       addEnt(m,{kind:'spot',id:'mok0',tx:x,ty:y,obj:'dummy',solid:true,on:()=>muDummy(id)});break}}}
 
 /* ── 갈림길: 진화와 파 ── */
-function muCanBreak(k){if(!hasSung(k)||!G.skills.includes(k)||sung(k)<10)return'대성해야 깨뜨릴 수 있다';const kd=muKind(k);
-  if(wmStage(kd)<MU_PA_NEED)return`${kd} 숙련이 ${MU_PA_NEED}단이 되어야 한다 (지금 ${wmStage(kd)}단)`;return null}
-const muGives=k=>isBig(k)&&!muchoAny();   // 새 무공은 큰 무공을 깨뜨릴 때만, 그리고 무초식에 들기 전에만
-async function muBreak(k){const s=SKILLS[k],tr=muCarry(k,sungMul(k));
-  await cutin('ELX','파(破)',`「${s.n}」을 깨뜨리다`);
-  G.skills=G.skills.filter(x=>x!==k);trAll().push(tr);G.flags['pa_'+k]=1;addTitle(trAll().length>1?`무공 ${trAll().length}개를 깨뜨린 자`:'스스로 무공을 깨뜨린 자');
-  await say(`「${s.n}」의 초식이 손에서 흩어졌다. 형(形)은 사라졌으나 쌓은 것은 몸에 남았다. (흔적: ${muFxDesc(tr).join(' · ')||'세기 '+tr.pow} — 무초식에 이르면 기본 공격에 실린다)`);
-  const left=G.skills.filter(hasSung).length,open=muchoOn()&&!left?' 이제 남은 초식이 없다. 필살 「일섬」이 열렸다.':'';
-  if(muchoAny()){await say('이미 무초식에 든 몸이다. 빈자리에 새 초식은 들어서지 않는다. 깨뜨린 것은 그대로 손끝에 실린다.'+open);hud();saveSoon();return}
-  if(!isBig(k)){await say('작은 초식 하나를 내려놓았다. 빈자리는 비워 둔다. (새 무공은 비전 같은 큰 무공을 깨뜨릴 때 얻는다)');hud();saveSoon();return}   // 사용자 결정 2026-11-11: 무초식에 든 뒤에는 깨뜨려도 새 무공을 배우지 못한다
-  const L=WM_KINDS.filter(kd=>!G.skills.includes(PAKEY[kd])&&!G.flags['pa_'+PAKEY[kd]]);
-  if(!L.length){await say('빈자리에 채울 것은 더 없다. 이미 여덟 갈래를 다 걸어 보았다.');hud();saveSoon();return}
-  const i=await choose(null,'빈손이 된 자리에 새 길이 보인다. 어느 갈래로 갈까? (비전과 같은 급의 무공이고, 1성부터 다시 닦는다)',L.map(kd=>({t:`${kd} — 「${SKILLS[PAKEY[kd]].n}」`,sub:SKILLS[PAKEY[kd]].d+' · 내공 '+SKILLS[PAKEY[kd]].cost+(G.flags.awk&&SHIDX[G.flags.awk]&&!SHIDX[G.flags.awk].st.includes(kd)?' · 폐관의 보정을 받지 못하는 갈래':'')})));
-  const nk=PAKEY[L[i]];learn(nk);await say(`누구에게 배운 것도 아닌 무공, 「${SKILLS[nk].n}」을 얻었다. 문파의 틀 밖에서 네가 낸 길이다.`);hud();saveSoon()}
-/* 갈림길 장면. 문파 사부와 세가 무사가 같이 쓴다. 골랐으면 true */
-async function muFork(e,k,ek,org,evoText,role){const ev=SKILLS[ek],no=muCanBreak(k);
-  await say(who(e),`「${SKILLS[k].n}」을 끝까지 닦았구나. 이제 내가 더 가르칠 초식은 없다. 여기서부터는 네가 고르는 길이다.`);
-  const i=await choose(who(e),`하나는 이 무공을 더 높은 곳으로 끌어올리는 길이고, 하나는 스스로 깨뜨리고 ${org}의 틀 밖으로 나가는 길이다.`,[
-    {t:`진화 — 「${ev.n}」으로 거듭난다`,sub:`${muDesc(ev)} · 내공 ${ev.cost} · 1성부터 다시 닦는다 · 지금 가장 세지는 길`},
-    {t:`파(破) — 「${SKILLS[k].n}」을 깨뜨린다`,sub:no||(muchoAny()?'이미 무초식에 들었다. 초식은 사라지고 그 힘이 기본 공격에 더해진다. 새 무공은 배우지 못한다':'초식은 사라지고 흔적이 남는다. 새 무공 하나를 배운다. 당장은 약해지고, 무초식에 이르러야 보상받는 길'),dis:!!no},'아직 정하지 못했다']);
-  if(i===0){await cutin('ELX','진화',`「${ev.n}」`);G.skills[G.skills.indexOf(k)]=ek;G.flags['evo_'+k]=1;addTitle(`${org}의 무학을 끌어올린 자`);
-    await say(evoText);await say(`「${SKILLS[k].n}」이(가) 「${ev.n}」(으)로 거듭났다. (${muDesc(ev)})`);hud();saveSoon();return true}
-  if(i===1){await say(who(e),'…깨뜨리겠다는 게냐. 배운 것을 버리는 자는 많았으나, 다 익히고 버리는 자는 드물었다.');await muBreak(k);
-    await say(who(e),`가거라. 무엇을 쥐든 너는 ${org}의 ${role}다. 네 길을 가라.`);return true}
-  await say(who(e),'서두를 것 없다. 정해지면 다시 오너라.');return false}
+/* 대성한 비전 → 진화. 문파 사부와 세가 무사가 같이 쓴다. 골랐으면 true (예전의 갈림길 자리. 지금은 고르지 않고 바로 거듭난다) */
+async function muFork(e,k,ek,org,evoText){const ev=SKILLS[ek];
+  await say(who(e),`「${SKILLS[k].n}」을 끝까지 닦았구나. 이제 내가 더 가르칠 초식은 없다. 남은 것은 이 무공을 한 단계 위로 끌어올리는 일이다.`);
+  await cutin('ELX','진화',`「${ev.n}」`);G.skills[G.skills.indexOf(k)]=ek;G.flags['evo_'+k]=1;addTitle(`${org}의 무학을 끌어올린 자`);
+  await say(evoText);await say(`「${SKILLS[k].n}」이(가) 「${ev.n}」(으)로 거듭났다. (${muDesc(ev)} · 1성부터 다시 닦는다)`);hud();saveSoon();return true}
 {const r0=sectRank;sectRank=async function(id,e){const k=id+'3';
   if((G.flags['rk_'+id]||0)>=2&&G.skills.includes(k)&&sung(k)>=10&&EVO[id]){if(await muFork(e,k,id+'4',SECTDEF[id].n,EVO[id][2],'제자')){if(G.skills.includes(id+'4'))G.flags['evo_'+id]=1;return}}
   return r0(id,e)}}
@@ -4131,15 +4110,14 @@ async function muFork(e,k,ek,org,evoText,role){const ev=SKILLS[ek],no=muCanBreak
 /* ── 메뉴: 「무공」 칸 ── */
 {const r0=renderMenu;renderMenu=function(){r0();const b=$('menuBody'),big=G.skills.filter(hasSung),T=trAll(),ks=WM_KINDS.filter(kd=>wmX(kd)>0);
   const h=document.createElement('div');let t='<h3>무공</h3>';
-  t+=big.length?big.map(k=>{const n=sung(k),no=muCanBreak(k),sect=MULINE[k]&&MULINE[k].fork;
-    return`<div class="irow"><span><b>${SKILLS[k].n}</b> <small>${MUBIG[k]||'초식'} · ${muKind(k)} · ${n>=10?'대성':n+'성'} · 피해 +${(n-1)*4}%${n<10?` · 다음 성까지 ${Math.ceil(muThr(k,n+1)-muX(k))}`:''}${n>=10&&no?' · '+no:''}${n>=10&&sect?` · ${MULINE[k].who}를 찾아가면 갈림길`:''}</small></span>${n>=10&&!no&&!sect?`<button class="sbtn" data-pa="${k}">깨뜨린다</button>`:''}</div>`}).join(''):'<p class="dim">닦을 초식이 없다.</p>';
-  t+='<p><small>초식은 쓸수록 성이 오르고, 대성하면 깨뜨릴 수 있다. 큰 무공(비전·고대 무학·상승 무공)을 깨뜨리면 새 무공을 얻는다.</small></p>';
+  t+=big.length?big.map(k=>{const n=sung(k),sect=MULINE[k]&&MULINE[k].fork;
+    return`<div class="irow"><span><b>${SKILLS[k].n}</b> <small>${MUBIG[k]||'초식'} · ${muKind(k)} · ${n>=10?'대성':n+'성'} · 피해 +${(n-1)*4}%${n<10?` · 다음 성까지 ${Math.ceil(muThr(k,n+1)-muX(k))}`:''}${n>=10&&sect?` · ${MULINE[k].who}를 찾아가면 진화`:''}</small></span></div>`}).join(''):'<p class="dim">닦을 초식이 없다.</p>';
+  t+='<p><small>초식은 쓸수록 성이 오른다. 문파·세가의 비전을 대성하면 사부에게서 한 단계 위로 거듭난다. 윗무공을 대성하면 아랫무공도 같이 대성한다.</small></p>';
   if(T.length)t+=`<p><b>흔적</b> <small>${T.map(x=>`${x.n}(${muFxDesc(x).join(', ')||'세기 '+x.pow})`).join(' · ')}</small></p>`;
-  t+=`<p><b>무기 숙련</b> <small>${ks.length?ks.map(kd=>{const s=wmStage(kd);return`${kd} ${s}단${s<5?` (${Math.floor(wmX(kd))}/${WM_THR[s+1]})`:' 무초식'}`}).join(' · '):'아직 없다'} — 단마다 그 갈래 초식 +5%, ${MU_PA_NEED}단부터 파(破), 5단에 닿으면 무초식: 가진 초식이 모두 깨져 기본 공격에 실린다</small></p>`;
+  t+=`<p><b>무기 숙련</b> <small>${ks.length?ks.map(kd=>{const s=wmStage(kd);return`${kd} ${s}단${s<5?` (${Math.floor(wmX(kd))}/${WM_THR[s+1]})`:' 무초식'}`}).join(' · '):'아직 없다'} — 단마다 그 갈래 초식 +5%, 5단에 닿으면 무초식: 가진 초식이 모두 깨져 기본 공격에 실린다</small></p>`;
   if(muchoOn())t+=`<p><b style="color:#e2b84a">무초식</b> <small>기본 공격: ${muchoDesc()}${muchoProf().n?' · 실린 것: '+muchoProf().names.join(', '):' · 아직 깨뜨린 무공이 없다'} · 필살 「일섬」: ${ultWhy()||'쓸 수 있다'}</small></p>`;
   h.innerHTML=t;const at=[...b.querySelectorAll('h3')].find(e=>e.textContent==='물건');b.insertBefore(h,at||null);
-  h.querySelectorAll('[data-pa]').forEach(x=>x.onclick=()=>{const k=x.dataset.pa;closeMenu();script(async()=>{
-    const i=await choose(null,`「${SKILLS[k].n}」을 깨뜨릴까? 초식은 사라지고 흔적만 남는다. 되돌릴 수 없다.`,[{t:'깨뜨린다',sub:muchoAny()?'이미 무초식에 들었다. 초식은 사라지고 그 힘이 기본 공격에 더해진다. 새 무공은 배우지 못한다':isBig(k)?'흔적이 남고, 새 무공 하나를 배운다. 1성부터 다시 닦는다':'흔적만 남는다. 작은 초식이라 새 무공은 얻지 못한다'},'그만둔다']);if(i===0)await muBreak(k)})})}}
+}}
 
 /* ── 지옥으로 이어받기: 깨달음은 남는다 ──
    사용자 2026-11-11: "과거로 돌아왔다고 깨달음을 잃어버리는 건 아니잖아. 내공이나 신체 조건은 약해질 수 있어도. 무초식은 깨달음의 영역일 텐데"
